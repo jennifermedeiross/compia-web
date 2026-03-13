@@ -77,6 +77,12 @@ const Checkout = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
+
   const sub = subtotal();
   const shipping = shippingMethods.find((m) => m.id === selectedShipping);
   const total = sub + (shipping?.price ?? 0);

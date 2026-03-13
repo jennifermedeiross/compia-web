@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { User, Order } from "@/types";
 import { api } from "@/api/mock-api";
-import { Phone } from "lucide-react";
+import { useCartStore } from "./cart-store";
 
 interface AuthStore {
   user: User | null;
@@ -74,12 +74,15 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
-      logout: () =>
+      logout: () => {
+        useCartStore.getState().clearCart();
+
         set({
           user: null,
           isAuthenticated: false,
           orders: [],
-        }),
+        });
+      },
 
       loadOrders: async () => {
         try {
