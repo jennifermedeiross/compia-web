@@ -25,7 +25,7 @@ const AdminCustomers = () => {
           <tbody>
             {customers.map((c) => (
               <tr key={c.id} className="border-t">
-                <td className="p-3 font-medium">{c.userName}</td>
+                <td className="p-3 font-medium">{c.name}</td>
                 <td className="p-3 text-muted-foreground">{c.email}</td>
                 <td className="p-3 text-right">{c.orders}</td>
                 <td className="p-3 text-right font-medium">{c.totalSpent}</td>

@@ -164,4 +164,25 @@ export const api = {
   customers: {
     list: () => apiFetch(`/customers`),
   },
+
+  auth: {
+    login: (email: string, password: string) =>
+      apiFetch("/users/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      }),
+
+    register: (name: string, email: string, password: string, phone: string) =>
+      apiFetch("/users/register", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          phone,
+        }),
+      }),
+
+    listUsers: () => apiFetch("/users"),
+  },
 };

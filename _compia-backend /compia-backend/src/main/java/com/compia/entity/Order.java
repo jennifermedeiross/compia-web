@@ -25,8 +25,8 @@ public class Order {
     private String orderNumber;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @JoinColumn(name = "user_id")
+    private User customer;
 
     private String paymentMethod;
 

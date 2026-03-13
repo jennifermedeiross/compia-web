@@ -1,8 +1,10 @@
 package com.compia.service;
 
 import com.compia.dto.CustomerDTO;
-import com.compia.entity.Customer;
-import com.compia.repository.CustomerRepository;
+import com.compia.dto.CustomerStatsDTO;
+import com.compia.entity.User;
+import com.compia.repository.OrderRepository;
+import com.compia.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,26 +14,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomerService {
 
-    private final CustomerRepository customerRepository;
+    private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
 
-    public Customer create(CustomerDTO dto) {
+    public List<CustomerStatsDTO> list() {
 
-        Customer customer = Customer.builder()
-                .name(dto.getName())
-                .email(dto.getEmail())
-                .phone(dto.getPhone())
-                .build();
-
-        return customerRepository.save(customer);
+        return userRepository.findByRole("CUSTOMER")
+                .stream()
+                .map(u -> new CustomerStatsDTO(
+                        u.getId(),
+                        u.getName(),
+                        u.getEmail(),
+                        u.getPhone(),
+                        orderRepository.countByCustomerId(u.getId()),
+                        orderRepository.sumTotalByCustomer(u.getId())
+                ))
+                .toList();
     }
 
-    public Customer findById(Long id) {
-        return customerRepository.findById(id)
+    public CustomerDTO findById(Long id) {
+
+        User u = userRepository.findById(id)
                 .orElseThrow();
-    }
 
-    public List<Customer> list() {
-        return customerRepository.findAll();
+        return new CustomerDTO(
+                u.getId(),
+                u.getName(),
+                u.getEmail(),
+                u.getPhone()
+        );
     }
-
 }

@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class CustomerDTO {
 
+    private long id;
     private String name;
     private String email;
     private String phone;

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,22 +19,16 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
-    private final CustomerRepository customerRepository;
+    private final UserRepository userRepository;
     private final EmailService emailService;
 
     @Transactional
     public Order create(CreateOrderDTO dto) {
 
-        // criar cliente
-        Customer customer = Customer.builder()
-                .name(dto.getCustomerInfo().getName())
-                .email(dto.getCustomerInfo().getEmail())
-                .phone(dto.getCustomerInfo().getPhone())
-                .build();
+        User customer = userRepository
+                .findByEmail(dto.getCustomerInfo().getEmail())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        customer = customerRepository.save(customer);
-
-        // criar pedido
         Order order = Order.builder()
                 .customer(customer)
                 .paymentMethod(dto.getPaymentMethod())
@@ -54,10 +49,8 @@ public class OrderService {
 
         savedOrder = orderRepository.save(savedOrder);
 
-        // variável final para usar na lambda
-        final Order orderRef = savedOrder;
+        Order finalOrder = savedOrder;
 
-        Order finalSavedOrder = savedOrder;
         List<OrderItem> items = dto.getItems().stream().map(i -> {
 
             Product product = productRepository
@@ -65,13 +58,13 @@ public class OrderService {
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
             return OrderItem.builder()
-                    .order(finalSavedOrder)
+                    .order(finalOrder)
                     .product(product)
                     .quantity(i.getQuantity())
                     .price(product.getPrice())
                     .build();
 
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toCollection(ArrayList::new));
 
         savedOrder.setItems(items);
 

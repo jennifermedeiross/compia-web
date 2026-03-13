@@ -2,9 +2,11 @@ package com.compia.config;
 
 import com.compia.entity.Product;
 import com.compia.entity.Review;
+import com.compia.entity.User;
 import com.compia.enums.Category;
 import com.compia.repository.ProductRepository;
 import com.compia.repository.ReviewRepository;
+import com.compia.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +21,7 @@ public class DataLoader {
 
     private final ProductRepository productRepository;
     private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
 
     @Bean
     CommandLineRunner loadData() {
@@ -207,6 +210,19 @@ public class DataLoader {
                     .comment("Aprendizado por reforço explicado claramente.")
                     .createdAt(LocalDate.parse("2024-10-15").atStartOfDay())
                     .build());
+
+            if (userRepository.findByEmail("admin@compia.com").isEmpty()) {
+
+                User admin = User.builder()
+                        .name("Admin")
+                        .email("admin@compia.com")
+                        .password("admin")
+                        .role("ADMIN")
+                        .phone("(83) 99999-9999")
+                        .build();
+
+                userRepository.save(admin);
+            }
 
         };
     }

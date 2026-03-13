@@ -17,12 +17,7 @@ import {
   formatCardNumber,
   formatExpiration,
 } from "@/lib/formatters";
-import {
-  ShippingMethod,
-  CustomerInfo,
-  ShippingAddress,
-  PixPayment,
-} from "@/types";
+import { ShippingMethod, Customer, ShippingAddress, PixPayment } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
 const Checkout = () => {
@@ -35,7 +30,8 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
 
   // Customer info
-  const [customer, setCustomer] = useState<CustomerInfo>({
+  const [customer, setCustomer] = useState<Customer>({
+    id: "",
     name: "",
     email: "",
     phone: "",

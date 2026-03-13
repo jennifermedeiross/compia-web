@@ -9,7 +9,12 @@ interface AuthStore {
   isAuthenticated: boolean;
 
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    phone: string,
+  ) => Promise<boolean>;
   logout: () => void;
 
   loadOrders: () => Promise<void>;
@@ -23,36 +28,47 @@ export const useAuthStore = create<AuthStore>()(
       orders: [],
       isAuthenticated: false,
 
-      login: async (email: string, _password: string) => {
-        await new Promise((r) => setTimeout(r, 800));
+      login: async (email, password) => {
+        try {
+          const user = await api.auth.login(email, password);
 
-        const isAdmin = email === "admin@compia.com";
+          set({
+            user: {
+              id: String(user.id),
+              name: user.name,
+              email: user.email,
+              role: user.role,
+            },
+            isAuthenticated: true,
+          });
 
-        set({
-          user: {
-            id: isAdmin ? "admin-1" : "user-1",
-            name: isAdmin ? "Administrador" : "João Silva",
-            email,
-            role: isAdmin ? "ADMIN" : "CUSTOMER",
-          },
-          isAuthenticated: true,
-        });
+          await get().loadOrders();
 
-        await get().loadOrders();
-
-        return true;
+          return true;
+        } catch {
+          return false;
+        }
       },
 
-      register: async (name: string, email: string, _password: string) => {
-        await new Promise((r) => setTimeout(r, 800));
+      register: async (name, email, password, phone) => {
+        try {
+          const user = await api.auth.register(name, email, password, phone);
 
-        set({
-          user: { id: "user-" + Date.now(), name, email, role: "CUSTOMER" },
-          isAuthenticated: true,
-          orders: [],
-        });
+          set({
+            user: {
+              id: String(user.id),
+              name: user.name,
+              email: user.email,
+              role: user.role,
+            },
+            isAuthenticated: true,
+            orders: [],
+          });
 
-        return true;
+          return true;
+        } catch {
+          return false;
+        }
       },
 
       logout: () =>
@@ -63,8 +79,13 @@ export const useAuthStore = create<AuthStore>()(
         }),
 
       loadOrders: async () => {
-        const orders = await api.orders.list();
-        set({ orders });
+        try {
+          const orders = await api.orders.list();
+
+          set({ orders });
+        } catch {
+          set({ orders: [] });
+        }
       },
 
       addOrder: (order) =>

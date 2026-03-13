@@ -9,7 +9,7 @@ public class OrderMapper {
 
     public static Order toEntity(
             CreateOrderDTO dto,
-            Customer customer,
+            User customer,
             List<OrderItem> items
     ) {
 
