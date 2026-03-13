@@ -60,6 +60,7 @@ export interface CreditCardData {
 }
 
 export interface PixPayment {
+  id: string;
   qrCode: string;
   copyPasteCode: string;
   expiresAt: string;

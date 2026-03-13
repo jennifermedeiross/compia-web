@@ -127,6 +127,31 @@ const Checkout = () => {
     setStep("shipping");
   };
 
+  const startPixPolling = (pixId: string) => {
+    const interval = setInterval(async () => {
+      const res = await api.payments.status(pixId);
+
+      if (res.status === "PAID") {
+        clearInterval(interval);
+
+        const order = await api.orders.create({
+          customerInfo: customer,
+          paymentMethod: paymentType,
+          subtotal: sub,
+          shippingCost: shipping?.price ?? 0,
+          total,
+
+          items: items.map((i) => ({
+            productId: Number(i.product.id),
+            quantity: i.quantity,
+          })),
+        });
+
+        navigate(`/pedido/${order.id}`);
+      }
+    }, 3000);
+  };
+
   const handleShippingSubmit = () => {
     if (!selectedShipping) {
       toast({ title: "Selecione um método de envio", variant: "destructive" });
@@ -139,15 +164,40 @@ const Checkout = () => {
     setLoading(true);
 
     try {
+      console.log(pixData);
+      if (paymentType === "PIX" && pixData) {
+        console.log("entrou no if");
+        const order = await api.orders.create({
+          customerInfo: customer,
+          paymentMethod: paymentType,
+          subtotal: sub,
+          shippingCost: shipping?.price ?? 0,
+          total,
+          items: items.map((i) => ({
+            productId: Number(i.product.id),
+            quantity: i.quantity,
+          })),
+        });
+
+        addOrder(order);
+        clearCart();
+
+        navigate(`/pedido/${order.id}`, { state: { order } });
+
+        setLoading(false);
+        return;
+      }
       if (paymentType === "PIX") {
         const pix = await api.payments.pix(total, customer);
 
         setPixData({
+          id: pix.id,
           qrCode: pix.qrCode,
           copyPasteCode: pix.copyPasteCode,
           expiresAt: pix.expiresAt,
         });
 
+        setLoading(false);
         return;
       } else {
         if (

@@ -48,10 +48,40 @@ public class PaymentService {
         Map data = (Map) response.get("data");
 
         return PixPaymentDTO.builder()
+                .id((String) data.get("id"))
                 .qrCode((String) data.get("brCodeBase64"))
                 .copyPasteCode((String) data.get("brCode"))
                 .expiresAt((String) data.get("expiresAt"))
                 .build();
     }
 
+    public Map<String, Object> checkPixStatus(String id) {
+
+        Map response = webClient.get()
+                .uri("/v1/pixQrCode/check?id=" + id)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+
+        Map data = (Map) response.get("data");
+
+        return Map.of(
+                "status", data.get("status")
+        );
+    }
+
+    public void simulatePayment(String id) {
+        webClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/v1/pixQrCode/simulate-payment?id=")
+                        .queryParam("id", id)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(Map.of("metadata", Map.of()))
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+    }
 }

@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class PixPaymentDTO {
 
+    private String id;
     private String qrCode;
     private String copyPasteCode;
     private String expiresAt;

@@ -105,19 +105,36 @@ export const api = {
         method: "POST",
         body: JSON.stringify(cardData),
       }),
+
+    status: async (pixId: string) => {
+      const response = await apiFetch(`/payments/pix/status/${pixId}`, {
+        method: "GET",
+      });
+
+      return response as { status: string };
+    },
+
+    simulate: async (pixId: string) => {
+      const response = await apiFetch(`/payments/pix/simulate/${pixId}`, {
+        method: "POST",
+      });
+
+      console.log("Simulated PIX payment:", response);
+      return response;
+    },
   },
 
   orders: {
     create: (orderData: any) => {
       const payload = {
-        customer: orderData.customer,
+        customerInfo: orderData.customerInfo,
         paymentMethod: orderData.paymentMethod,
         subtotal: orderData.subtotal,
         shippingCost: orderData.shippingCost,
         total: orderData.total,
 
         items: orderData.items.map((i: any) => ({
-          productId: Number(i.product.id),
+          productId: Number(i.productId),
           quantity: i.quantity,
         })),
       };
