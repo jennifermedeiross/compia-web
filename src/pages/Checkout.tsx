@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CreditCard, QrCode, Loader2, Copy, CheckCircle2 } from "lucide-react";
 import { StoreLayout } from "@/components/StoreLayout";
@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Checkout = () => {
   const { items, subtotal, clearCart } = useCartStore();
-  const { addOrder } = useAuthStore();
+  const { user, addOrder } = useAuthStore();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -65,6 +65,17 @@ const Checkout = () => {
   });
   const [pixData, setPixData] = useState<PixPayment | null>(null);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setCustomer({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      });
+    }
+  }, [user]);
 
   const sub = subtotal();
   const shipping = shippingMethods.find((m) => m.id === selectedShipping);
@@ -121,31 +132,6 @@ const Checkout = () => {
     if (methods.length === 1) setSelectedShipping(methods[0].id);
     setLoading(false);
     setStep("shipping");
-  };
-
-  const startPixPolling = (pixId: string) => {
-    const interval = setInterval(async () => {
-      const res = await api.payments.status(pixId);
-
-      if (res.status === "PAID") {
-        clearInterval(interval);
-
-        const order = await api.orders.create({
-          customerInfo: customer,
-          paymentMethod: paymentType,
-          subtotal: sub,
-          shippingCost: shipping?.price ?? 0,
-          total,
-
-          items: items.map((i) => ({
-            productId: Number(i.product.id),
-            quantity: i.quantity,
-          })),
-        });
-
-        navigate(`/pedido/${order.id}`);
-      }
-    }, 3000);
   };
 
   const handleShippingSubmit = () => {
@@ -292,6 +278,7 @@ const Checkout = () => {
                           onChange={(e) =>
                             setCustomer({ ...customer, email: e.target.value })
                           }
+                          disabled
                         />
                       </div>
                       <div>

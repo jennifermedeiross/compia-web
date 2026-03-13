@@ -103,6 +103,7 @@ export interface User {
   name: string;
   email: string;
   role: "CUSTOMER" | "ADMIN";
+  phone: string;
 }
 
 export interface AdminStats {
