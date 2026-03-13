@@ -117,7 +117,10 @@ const Checkout = () => {
       return;
     }
     setLoading(true);
-    const methods = await api.shipping.calculate(address.cep, items);
+
+    const cleanCep = address.cep.replace(/\D/g, "");
+
+    const methods = await api.shipping.calculate(cleanCep, items);
     setShippingMethods(methods);
     if (methods.length === 1) setSelectedShipping(methods[0].id);
     setLoading(false);
@@ -137,8 +140,15 @@ const Checkout = () => {
 
     try {
       if (paymentType === "PIX") {
-        const pix = await api.payments.pix("temp");
-        setPixData(pix);
+        const pix = await api.payments.pix(total);
+
+        setPixData({
+          qrCode: pix.qr_code,
+          copyPasteCode: pix.copy_paste,
+          expiresAt: pix.expires_at,
+        });
+
+        return;
       } else {
         if (
           !cardData.number ||

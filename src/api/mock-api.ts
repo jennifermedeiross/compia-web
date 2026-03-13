@@ -55,19 +55,39 @@ export const api = {
   },
 
   shipping: {
-    calculate: (cep: string, items: CartItem[]) =>
-      apiFetch(`/shipping/calculate`, {
+    calculate: async (cep: string, items: CartItem[]) => {
+      const response = await apiFetch(`/shipping/calculate`, {
         method: "POST",
-        body: JSON.stringify({ cep, items }),
-      }),
+        body: JSON.stringify({
+          cep,
+          items: items.map((i) => ({
+            productId: Number(i.product.id),
+            quantity: i.quantity,
+          })),
+        }),
+      });
+
+      return response.map((m: any) => ({
+        id: String(m.id),
+
+        name: `${m.company?.name ?? ""} ${m.name}`.trim(),
+
+        price: parseFloat(m.price ?? "0"),
+
+        estimatedDays: m.delivery_time ?? m.delivery_range?.max ?? 0,
+
+        description: m.company?.name ?? "",
+      }));
+    },
   },
 
   payments: {
-    pix: (orderId: string) =>
-      apiFetch(`/payments/pix`, {
+    pix: async (total: number) => {
+      return apiFetch(`/payments/pix`, {
         method: "POST",
-        body: JSON.stringify({ orderId }),
-      }),
+        body: JSON.stringify({ amount: total }),
+      });
+    },
 
     card: (cardData: unknown) =>
       apiFetch(`/payments/card`, {
