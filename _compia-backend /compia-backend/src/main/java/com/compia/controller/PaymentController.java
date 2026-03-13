@@ -2,6 +2,7 @@ package com.compia.controller;
 
 import com.compia.dto.PixPaymentDTO;
 import com.compia.service.PaymentService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,25 +11,20 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
-@CrossOrigin("*")
+@RequiredArgsConstructor
 public class PaymentController {
-    @Autowired
-    PaymentService paymentService;
+
+    private final PaymentService paymentService;
 
     @PostMapping("/pix")
-    public Object createPix(@RequestBody Map<String, Object> body) {
+    public Object pix(@RequestBody Map<String, Object> body) {
+        System.out.println(body);
 
-        Double amount = Double.valueOf(body.get("amount").toString());
+        double total = Double.parseDouble(body.get("total").toString());
+        String name = body.get("name").toString();
+        String email = body.get("email").toString();
+        String phone = body.get("phone").toString();
 
-        return paymentService.createPix(amount, "Pedido Compia");
-    }
-
-    @PostMapping("/card")
-    public Object card(@RequestBody Object cardData) {
-
-        return new Object() {
-            public final boolean approved = true;
-            public final String transactionId = "TXN-" + System.currentTimeMillis();
-        };
+        return paymentService.createPixPayment(total, name, email, phone);
     }
 }

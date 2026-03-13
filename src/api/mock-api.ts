@@ -5,6 +5,7 @@ import {
   Order,
   ViaCEPResponse,
   CartItem,
+  Customer,
 } from "@/types";
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -82,11 +83,21 @@ export const api = {
   },
 
   payments: {
-    pix: async (total: number) => {
-      return apiFetch(`/payments/pix`, {
+    pix: async (total: number, customer: Customer) => {
+      const response = await apiFetch("/payments/pix", {
         method: "POST",
-        body: JSON.stringify({ amount: total }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          total,
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone,
+        }),
       });
+
+      return response as PixPayment;
     },
 
     card: (cardData: unknown) =>

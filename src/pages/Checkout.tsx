@@ -140,12 +140,12 @@ const Checkout = () => {
 
     try {
       if (paymentType === "PIX") {
-        const pix = await api.payments.pix(total);
+        const pix = await api.payments.pix(total, customer);
 
         setPixData({
-          qrCode: pix.qr_code,
-          copyPasteCode: pix.copy_paste,
-          expiresAt: pix.expires_at,
+          qrCode: pix.qrCode,
+          copyPasteCode: pix.copyPasteCode,
+          expiresAt: pix.expiresAt,
         });
 
         return;

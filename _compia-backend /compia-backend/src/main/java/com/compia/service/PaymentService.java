@@ -1,41 +1,57 @@
 package com.compia.service;
 
+import com.compia.dto.PixPaymentDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
 import java.util.Map;
 
 @Service
 public class PaymentService {
 
-    @Value("${abacatepay.url}")
-    private String baseUrl;
-
     @Value("${abacatepay.token}")
     private String token;
 
-    private final WebClient webClient = WebClient.builder().build();
+    private final WebClient webClient = WebClient.builder()
+            .baseUrl("https://api.abacatepay.com")
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
 
-    public Object createPix(Double amount, String description) {
-        // Converter para centavos (Long) para evitar problemas de precisão e rejeição da API
-        long amountInCents = Math.round(amount * 100);
+    public PixPaymentDTO createPixPayment(double total, String name, String email, String phone) {
 
-        Map<String, Object> body = Map.of(
-                "amount", amountInCents,
-                "description", description,
-                "externalId", "ORDER-" + System.currentTimeMillis(),
-                "methods", List.of("pix") // Muitas APIs exigem definir o método explicitamente
+        Map<String, Object> customer = Map.of(
+                "name", name,
+                "email", email,
+                "cellphone", phone,
+                "taxId", "111.444.777-35"
         );
 
-        return webClient.post()
-                .uri(baseUrl + "/v1/pix/create")
-                .header("Authorization", "Bearer " + token)
-                .header("Accept", "application/json") // Adicione este header também
+        Map<String, Object> body = Map.of(
+                "amount", (int) Math.round(total * 100),
+                "expiresIn", 3600,
+                "description", "Compra COMPIA Editora",
+                "customer", customer,
+                "metadata", Map.of("externalId", "pedido-123")
+        );
+
+        Map response = webClient.post()
+                .uri("/v1/pixQrCode/create")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .bodyValue(body)
                 .retrieve()
-                .bodyToMono(Object.class)
+                .bodyToMono(Map.class)
                 .block();
+
+        Map data = (Map) response.get("data");
+
+        return PixPaymentDTO.builder()
+                .qrCode((String) data.get("brCodeBase64"))
+                .copyPasteCode((String) data.get("brCode"))
+                .expiresAt((String) data.get("expiresAt"))
+                .build();
     }
+
 }
