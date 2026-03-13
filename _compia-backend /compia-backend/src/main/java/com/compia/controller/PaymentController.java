@@ -1,23 +1,26 @@
 package com.compia.controller;
 
 import com.compia.dto.PixPaymentDTO;
+import com.compia.service.PaymentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
 @CrossOrigin("*")
 public class PaymentController {
+    @Autowired
+    PaymentService paymentService;
 
     @PostMapping("/pix")
-    public PixPaymentDTO pix(@RequestBody Object request) {
+    public Object createPix(@RequestBody Map<String, Object> body) {
 
-        return PixPaymentDTO.builder()
-                .qrCode("data:image/png;base64,PIX_SIMULADO")
-                .copyPasteCode("000201PIXCOMPiaSIMULADO123456")
-                .expiresAt(LocalDateTime.now().plusMinutes(30).toString())
-                .build();
+        Double amount = Double.valueOf(body.get("amount").toString());
+
+        return paymentService.createPix(amount, "Pedido Compia");
     }
 
     @PostMapping("/card")
