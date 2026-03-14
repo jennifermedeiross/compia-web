@@ -1,5 +1,6 @@
 package com.compia.enums;
 
+
 public enum Category {
 
     DEEP_LEARNING("Deep Learning"),
@@ -29,5 +30,12 @@ public enum Category {
             }
         }
         throw new IllegalArgumentException("Categoria inválida: " + value);
+    }
+
+    public boolean equalsIgnoreCase(String category) {
+        if (category == null) return false;
+
+        return label.equalsIgnoreCase(category) ||
+                name().equalsIgnoreCase(category);
     }
 }

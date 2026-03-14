@@ -15,14 +15,54 @@ public class ProductService {
 
     private final ProductRepository repository;
 
-    public List<Product> list(Category category) {
+    public List<Product> list(String category, String search, String sort) {
 
-        if (category == null) {
-            return repository.findAll();
+        List<Product> products = repository.findAll();
+
+        if (category != null && !category.isEmpty()) {
+            products = products.stream()
+                    .filter(p -> p.getCategory().equalsIgnoreCase(category))
+                    .toList();
         }
 
-        return repository.findByCategory(category);
+        if (search != null && !search.isEmpty()) {
+            String s = search.toLowerCase();
+
+            products = products.stream()
+                    .filter(p ->
+                            p.getTitle().toLowerCase().contains(s) ||
+                                    p.getAuthor().toLowerCase().contains(s)
+                    )
+                    .toList();
+        }
+
+        if ("price-asc".equals(sort)) {
+            products = products.stream()
+                    .sorted(Comparator.comparing(Product::getPrice))
+                    .toList();
+        }
+
+        if ("price-desc".equals(sort)) {
+            products = products.stream()
+                    .sorted(Comparator.comparing(Product::getPrice).reversed())
+                    .toList();
+        }
+
+        if ("rating".equals(sort)) {
+            products = products.stream()
+                    .sorted(Comparator.comparing(Product::getRating).reversed())
+                    .toList();
+        }
+
+        if ("newest".equals(sort)) {
+            products = products.stream()
+                    .sorted(Comparator.comparing(Product::getId).reversed())
+                    .toList();
+        }
+
+        return products;
     }
+
 
     public Product get(Long id) {
         return repository.findById(id).orElseThrow();

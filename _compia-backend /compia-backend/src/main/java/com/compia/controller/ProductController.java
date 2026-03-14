@@ -20,15 +20,16 @@ public class ProductController {
     private final ProductService service;
 
     @GetMapping
-    public List<Product> list(@RequestParam(required = false) String category) {
-
-        Category cat = null;
-
+    public List<Product> list(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String sort
+    ) {
         if (category != null && !category.equals("Todos")) {
-            cat = Category.fromLabel(category);
+            category = String.valueOf(Category.fromLabel(category));
         }
 
-        return service.list(cat);
+        return service.list(category, search, sort);
     }
 
     @GetMapping("/{id}")
