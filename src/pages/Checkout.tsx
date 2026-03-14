@@ -118,26 +118,39 @@ const Checkout = () => {
       });
       return;
     }
-    if (
-      hasPhysical &&
-      (!address.cep ||
+
+    if (hasPhysical) {
+      if (
+        !address.cep ||
         !address.street ||
         !address.number ||
         !address.city ||
-        !address.state)
-    ) {
-      toast({ title: "Preencha o endereço completo", variant: "destructive" });
-      return;
+        !address.state
+      ) {
+        toast({
+          title: "Preencha o endereço completo",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setLoading(true);
+
+      const cleanCep = address.cep.replace(/\D/g, "");
+      const methods = await api.shipping.calculate(cleanCep, items);
+
+      setShippingMethods(methods);
+
+      if (methods.length === 1) {
+        setSelectedShipping(methods[0].id);
+      }
+
+      setLoading(false);
+      setStep("shipping");
+    } else {
+      // só ebook -> vai direto pro pagamento
+      setStep("payment");
     }
-    setLoading(true);
-
-    const cleanCep = address.cep.replace(/\D/g, "");
-
-    const methods = await api.shipping.calculate(cleanCep, items);
-    setShippingMethods(methods);
-    if (methods.length === 1) setSelectedShipping(methods[0].id);
-    setLoading(false);
-    setStep("shipping");
   };
 
   const handleShippingSubmit = () => {
