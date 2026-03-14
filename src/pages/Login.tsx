@@ -118,6 +118,9 @@ const Login = () => {
                   Use <strong>admin@compia.com</strong> para acessar o painel
                   admin
                 </p>
+                <p className="text-xs text-muted-foreground text-center">
+                  Senha: <strong>admin</strong>
+                </p>
               </form>
             </TabsContent>
 
