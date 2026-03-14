@@ -79,7 +79,7 @@ export interface Order {
   shippingCost: number;
   total: number;
   createdAt: string;
-  downloadLinks?: DownloadLink[];
+  downloadLinks?: string[];
   orderNumber: string;
 }
 

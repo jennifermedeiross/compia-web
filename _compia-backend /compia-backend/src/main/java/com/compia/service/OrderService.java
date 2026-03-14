@@ -66,6 +66,13 @@ public class OrderService {
 
         }).collect(Collectors.toCollection(ArrayList::new));
 
+        List<String> links = items.stream()
+                .filter(i -> i.getProduct().getProductType().equals("EBOOK"))
+                .map(i -> i.getProduct().getTitle())
+                .toList();
+
+        savedOrder.setDownloadLinks(links);
+
         savedOrder.setItems(items);
 
         savedOrder = orderRepository.save(savedOrder);

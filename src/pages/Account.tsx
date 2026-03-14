@@ -29,6 +29,32 @@ const Account = () => {
     CANCELLED: "text-destructive",
   };
 
+  const downloadFakeEbook = (title: string) => {
+    const content = `
+    ${title}
+
+    Este é um ebook de demonstração.
+
+    Obrigado por comprar na COMPIA Editora.
+
+    Este arquivo foi gerado apenas para simulação de download.
+    `;
+
+    const blob = new Blob([content], { type: "application/pdf" });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${title}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <StoreLayout>
       <div className="container py-8 max-w-4xl">
@@ -120,14 +146,14 @@ const Account = () => {
                     <p className="text-xs text-muted-foreground mb-2">
                       Pedido {o.id}
                     </p>
-                    {o.downloadLinks!.map((dl) => (
+                    {o.downloadLinks!.map((title) => (
                       <Button
-                        key={dl.productId}
+                        key={title}
                         variant="outline"
                         size="sm"
                         className="gap-2 mr-2 mb-2"
-                        onClick={() => alert("Download simulado: " + dl.title)}>
-                        <Download className="h-3.5 w-3.5" /> {dl.title}
+                        onClick={() => downloadFakeEbook(title)}>
+                        <Download className="h-3.5 w-3.5" /> {title}
                       </Button>
                     ))}
                   </div>

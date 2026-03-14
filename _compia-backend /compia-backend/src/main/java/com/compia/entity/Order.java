@@ -42,6 +42,9 @@ public class Order {
 
     private LocalDateTime createdAt;
 
+    @Transient
+    private List<String> downloadLinks;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<OrderItem> items;
