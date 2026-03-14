@@ -14,13 +14,14 @@ public class WebConfig {
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
+
         return new WebMvcConfigurer() {
 
             @Override
             public void addCorsMappings(CorsRegistry registry) {
 
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:8080", "http://localhost:5173")
+                        .allowedOriginPatterns("*")
                         .allowedMethods("*")
                         .allowedHeaders("*");
             }
@@ -33,10 +34,8 @@ public class WebConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of(
-                "http://localhost:8080",
-                "http://127.0.0.1:8080"
-        ));
+
+        config.setAllowedOriginPatterns(List.of("*"));
 
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
