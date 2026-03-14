@@ -1,11 +1,12 @@
-import { Link } from 'react-router-dom';
-import { ShoppingCart, Star, Download } from 'lucide-react';
-import { Product } from '@/types';
-import { useCartStore } from '@/stores/cart-store';
-import { formatPrice } from '@/lib/formatters';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { Link } from "react-router-dom";
+import { ShoppingCart, Star, Download } from "lucide-react";
+import { Product } from "@/types";
+import { useCartStore } from "@/stores/cart-store";
+import { formatPrice } from "@/lib/formatters";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface ProductCardProps {
   product: Product;
@@ -14,13 +15,26 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((s) => s.addItem);
   const { toast } = useToast();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast({
+        title: "Login necessário",
+        description:
+          "Você precisa estar logado para adicionar itens ao carrinho.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     addItem(product);
+
     toast({
-      title: 'Adicionado ao carrinho',
+      title: "Adicionado ao carrinho",
       description: `${product.title} foi adicionado.`,
     });
   };
@@ -35,7 +49,7 @@ export function ProductCard({ product }: ProductCardProps) {
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
-          {product.productType === 'EBOOK' && (
+          {product.productType === "EBOOK" && (
             <Badge className="absolute top-2 left-2 gap-1" variant="secondary">
               <Download className="h-3 w-3" />
               eBook
@@ -54,11 +68,15 @@ export function ProductCard({ product }: ProductCardProps) {
             <div className="flex items-center gap-1">
               <Star className="h-3.5 w-3.5 fill-warning text-warning" />
               <span className="text-xs font-medium">{product.rating}</span>
-              <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
+              <span className="text-xs text-muted-foreground">
+                ({product.reviewCount})
+              </span>
             </div>
           )}
           <div className="flex items-center justify-between pt-1">
-            <span className="text-lg font-bold">{formatPrice(product.price)}</span>
+            <span className="text-lg font-bold">
+              {formatPrice(product.price)}
+            </span>
             <Button size="sm" onClick={handleAdd} className="gap-1">
               <ShoppingCart className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Comprar</span>
