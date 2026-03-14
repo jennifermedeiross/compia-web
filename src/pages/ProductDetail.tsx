@@ -18,6 +18,7 @@ import { useCartStore } from "@/stores/cart-store";
 import { formatPrice } from "@/lib/formatters";
 import { useToast } from "@/hooks/use-toast";
 import { Product, Review } from "@/types";
+import { useAuthStore } from "@/stores/auth-store";
 
 const ProductDetail = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -27,6 +28,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((s) => s.addItem);
   const { toast } = useToast();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => {
     if (!id) return;
@@ -194,7 +196,18 @@ const ProductDetail = () => {
               size="lg"
               className="w-full gap-2"
               onClick={() => {
+                if (!isAuthenticated) {
+                  toast({
+                    title: "Login necessário",
+                    description:
+                      "Você precisa estar logado para adicionar itens ao carrinho.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
                 addItem(product);
+
                 toast({
                   title: "Adicionado!",
                   description: `${product.title} no carrinho.`,
