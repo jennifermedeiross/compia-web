@@ -30,6 +30,14 @@ export function ProductCard({ product }: ProductCardProps) {
       });
       return;
     }
+    if (product.stock <= 0) {
+      toast({
+        title: "Produto indisponível",
+        description: "Este produto está sem estoque no momento.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     addItem(product);
 
@@ -77,9 +85,15 @@ export function ProductCard({ product }: ProductCardProps) {
             <span className="text-lg font-bold">
               {formatPrice(product.price)}
             </span>
-            <Button size="sm" onClick={handleAdd} className="gap-1">
+            <Button
+              size="sm"
+              onClick={handleAdd}
+              className="gap-1"
+              disabled={product.stock <= 0}>
               <ShoppingCart className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Comprar</span>
+              <span className="hidden sm:inline">
+                {product.stock <= 0 ? "Sem estoque" : "Comprar"}
+              </span>
             </Button>
           </div>
         </div>
